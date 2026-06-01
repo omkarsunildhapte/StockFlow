@@ -8,7 +8,7 @@ export default async function RootPage() {
 
   if (token) {
     try {
-      verifyToken(token);
+      await verifyToken(token);
       redirect("/dashboard");
     } catch {
       redirect("/login");

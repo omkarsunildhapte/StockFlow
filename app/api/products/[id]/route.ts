@@ -7,7 +7,7 @@ async function getProduct(id: string, orgId: string) {
 }
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const user = getAuthUser(req);
+  const user = await getAuthUser(req);
   if (!user) return unauthorized();
 
   const { id } = await params;
@@ -18,7 +18,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 }
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const user = getAuthUser(req);
+  const user = await getAuthUser(req);
   if (!user) return unauthorized();
 
   const { id } = await params;
@@ -56,7 +56,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const user = getAuthUser(req);
+  const user = await getAuthUser(req);
   if (!user) return unauthorized();
 
   const { id } = await params;

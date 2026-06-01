@@ -1,10 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function SettingsPage() {
-  const router = useRouter();
   const [threshold, setThreshold] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -13,12 +11,11 @@ export default function SettingsPage() {
 
   useEffect(() => {
     fetch("/api/settings").then(async (res) => {
-      if (res.status === 401) { router.push("/login"); return; }
       const data = await res.json();
       setThreshold(String(data.defaultLowStockThreshold ?? 5));
       setLoading(false);
     });
-  }, [router]);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -63,10 +60,11 @@ export default function SettingsPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="defaultThreshold" className="block text-sm font-medium text-gray-700 mb-1">
               Default Low Stock Threshold
             </label>
             <input
+              id="defaultThreshold"
               type="number"
               min={0}
               required

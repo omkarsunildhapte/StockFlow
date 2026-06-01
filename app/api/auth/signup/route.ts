@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     data: { email, passwordHash, organizationId: org.id },
   });
 
-  const token = signToken({ userId: user.id, orgId: org.id, email: user.email });
+  const token = await signToken({ userId: user.id, orgId: org.id, email: user.email });
 
   const res = Response.json({ ok: true });
   const headers = new Headers(res.headers);

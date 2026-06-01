@@ -66,10 +66,11 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
     <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 p-6 space-y-5 max-w-xl">
       <div className="grid grid-cols-2 gap-4">
         <div className="col-span-2 sm:col-span-1">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
             Name <span className="text-red-500">*</span>
           </label>
           <input
+            id="name"
             type="text"
             required
             value={form.name}
@@ -79,10 +80,11 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
         </div>
 
         <div className="col-span-2 sm:col-span-1">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="sku" className="block text-sm font-medium text-gray-700 mb-1">
             SKU <span className="text-red-500">*</span>
           </label>
           <input
+            id="sku"
             type="text"
             required
             value={form.sku}
@@ -93,8 +95,9 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">Description</label>
         <textarea
+          id="description"
           value={form.description}
           onChange={(e) => set("description", e.target.value)}
           rows={2}
@@ -104,8 +107,9 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
 
       <div className="grid grid-cols-3 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Qty on Hand</label>
+          <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">Qty on Hand</label>
           <input
+            id="quantity"
             type="number"
             min={0}
             value={form.quantity}
@@ -115,8 +119,9 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Cost Price</label>
+          <label htmlFor="costPrice" className="block text-sm font-medium text-gray-700 mb-1">Cost Price</label>
           <input
+            id="costPrice"
             type="number"
             min={0}
             step="0.01"
@@ -128,8 +133,9 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Selling Price</label>
+          <label htmlFor="sellingPrice" className="block text-sm font-medium text-gray-700 mb-1">Selling Price</label>
           <input
+            id="sellingPrice"
             type="number"
             min={0}
             step="0.01"
@@ -142,11 +148,12 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
       </div>
 
       <div className="max-w-xs">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="lowStockThreshold" className="block text-sm font-medium text-gray-700 mb-1">
           Low Stock Threshold
           <span className="ml-1 text-gray-400 font-normal">(optional)</span>
         </label>
         <input
+          id="lowStockThreshold"
           type="number"
           min={0}
           value={form.lowStockThreshold}
