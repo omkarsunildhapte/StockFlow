@@ -17,7 +17,7 @@ export async function signupAndLogin(page: Page, email: string, password = "pass
 export async function login(page: Page, email: string, password = "password123") {
   await page.goto("/login");
   await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password").fill(password);
+  await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Sign in" }).click();
   await page.waitForURL("**/dashboard");
 }

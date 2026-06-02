@@ -8,8 +8,8 @@ test.describe("Products", () => {
 
   test("empty state shows add product prompt", async ({ page }) => {
     await page.goto("/products");
-    await expect(page.getByText("No products found.")).toBeVisible();
-    await expect(page.getByRole("link", { name: "Add your first product" })).toBeVisible();
+    await expect(page.getByText("No products found")).toBeVisible();
+    await expect(page.getByRole("link", { name: /Add Product/ }).first()).toBeVisible();
   });
 
   test("create a product and see it in the list", async ({ page }) => {
@@ -29,7 +29,7 @@ test.describe("Products", () => {
     await page.getByLabel("SKU").fill("WGT-DUP");
     await page.getByRole("button", { name: "Create product" }).click();
 
-    await expect(page.getByText("SKU already exists")).toBeVisible();
+    await expect(page.getByText("SKU already exists in your organization")).toBeVisible();
   });
 
   test("create product requires name and SKU", async ({ page }) => {
@@ -61,10 +61,13 @@ test.describe("Products", () => {
     await page.goto("/products");
     await expect(page.getByText("To Delete")).toBeVisible();
 
-    page.on("dialog", (d) => d.accept());
     await page.getByRole("button", { name: "Delete" }).first().click();
 
-    await expect(page.getByText("To Delete")).not.toBeVisible();
+    const dialog = page.getByRole("alertdialog");
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole("button", { name: "Delete" }).click();
+
+    await expect(page.getByText("To Delete", { exact: true })).not.toBeVisible();
   });
 
   test("search filters products by name", async ({ page }) => {
@@ -100,7 +103,7 @@ test.describe("Products", () => {
     await createProduct(page, { name: "Full Item", sku: "FULL-001", quantity: 10, threshold: 5 });
 
     await page.goto("/products");
-    await expect(page.getByText("OK")).toBeVisible();
+    await expect(page.getByText("In Stock")).toBeVisible();
   });
 
   test("cancel on edit form navigates back", async ({ page }) => {

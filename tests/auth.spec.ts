@@ -20,7 +20,7 @@ test.describe("Auth", () => {
     await page.getByLabel("Confirm password").fill("password123");
     await page.getByRole("button", { name: "Create account" }).click();
 
-    await expect(page).toHaveURL(/\/dashboard/);
+    await page.waitForURL(/\/dashboard/);
     await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
   });
 
@@ -68,7 +68,7 @@ test.describe("Auth", () => {
     await page.context().clearCookies();
     await page.goto("/login");
     await page.getByLabel("Email").fill(email);
-    await page.getByLabel("Password").fill("wrongpassword");
+    await page.getByLabel("Password", { exact: true }).fill("wrongpassword");
     await page.getByRole("button", { name: "Sign in" }).click();
 
     await expect(page.getByText("Invalid credentials")).toBeVisible();

@@ -17,7 +17,7 @@ test.describe("Settings", () => {
     await page.getByLabel("Default Low Stock Threshold").fill("10");
     await page.getByRole("button", { name: "Save settings" }).click();
 
-    await expect(page.getByText("Settings saved.")).toBeVisible();
+    await expect(page.getByText("Settings saved")).toBeVisible();
 
     await page.reload();
     await expect(page.getByLabel("Default Low Stock Threshold")).toHaveValue("10");
@@ -27,7 +27,7 @@ test.describe("Settings", () => {
     await page.goto("/settings");
     await page.getByLabel("Default Low Stock Threshold").fill("20");
     await page.getByRole("button", { name: "Save settings" }).click();
-    await expect(page.getByText("Settings saved.")).toBeVisible();
+    await expect(page.getByText("Settings saved")).toBeVisible();
 
     // qty 15 with no per-product threshold — low against global of 20
     await createProduct(page, { name: "Global Threshold Item", sku: "GLB-001", quantity: 15 });
