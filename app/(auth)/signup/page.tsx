@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -14,7 +15,7 @@ export default function SignupPage() {
     setForm((f) => ({ ...f, [field]: value }));
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: { preventDefault(): void }) {
     e.preventDefault();
     setError("");
 
@@ -36,6 +37,7 @@ export default function SignupPage() {
     setLoading(false);
 
     if (res.ok) {
+      toast.success("Account created! Welcome to StockFlow.");
       router.push("/dashboard");
     } else {
       const data = await res.json();

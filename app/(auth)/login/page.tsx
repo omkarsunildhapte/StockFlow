@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,7 +12,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: { preventDefault(): void }) {
     e.preventDefault();
     setError("");
     setLoading(true);
@@ -25,6 +26,7 @@ export default function LoginPage() {
     setLoading(false);
 
     if (res.ok) {
+      toast.success("Welcome back!");
       router.push("/dashboard");
     } else {
       const data = await res.json();
