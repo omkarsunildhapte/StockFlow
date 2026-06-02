@@ -3,17 +3,21 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Search, Plus, PackageOpen, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
 
 interface Product {
   id: string;
@@ -39,19 +43,15 @@ export default function ProductsPage() {
     setLoading(false);
   }, [router]);
 
-  useEffect(() => {
-    fetchProducts(search);
-  }, [search, fetchProducts]);
+  useEffect(() => { fetchProducts(search); }, [search, fetchProducts]);
 
   async function handleDelete() {
     if (!confirmTarget) return;
     const { id, name } = confirmTarget;
     setConfirmTarget(null);
     setDeleting(id);
-
     const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
     setDeleting(null);
-
     if (res.ok) {
       setProducts((prev) => prev.filter((p) => p.id !== id));
       toast.success(`"${name}" deleted`);
@@ -63,90 +63,117 @@ export default function ProductsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Products</h1>
-        <Link
-          href="/products/new"
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
-        >
-          + Add Product
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Products</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {loading ? "Loading…" : `${products.length} product${products.length !== 1 ? "s" : ""}`}
+          </p>
+        </div>
+        <Link href="/products/new" className={cn(buttonVariants(), "gap-1.5")}>
+          <Plus size={15} /> Add Product
         </Link>
       </div>
 
-      <input
-        type="text"
-        placeholder="Search by name or SKU…"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-full max-w-sm border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
+      <div className="relative max-w-sm">
+        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+        <Input
+          placeholder="Search by name or SKU…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-9"
+        />
+      </div>
 
       {loading ? (
-        <div className="text-sm text-gray-400 py-12 text-center">Loading…</div>
+        <Card>
+          <CardContent className="p-0">
+            <div className="divide-y">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="flex items-center gap-4 px-4 py-3">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-4 w-12 ml-auto" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       ) : products.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-          <p className="text-gray-400 text-sm mb-3">No products found.</p>
-          <Link href="/products/new" className="text-blue-600 text-sm hover:underline">
-            Add your first product
-          </Link>
-        </div>
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-16 gap-3">
+            <div className="bg-muted rounded-full p-4">
+              <PackageOpen size={28} className="text-muted-foreground" />
+            </div>
+            <div className="text-center">
+              <p className="font-medium text-gray-700">No products found</p>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {search ? "Try a different search term" : "Add your first product to get started"}
+              </p>
+            </div>
+            {!search && (
+              <Link href="/products/new" className={cn(buttonVariants({ size: "sm" }), "gap-1.5 mt-1")}>
+                <Plus size={14} /> Add Product
+              </Link>
+            )}
+          </CardContent>
+        </Card>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Name</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">SKU</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-600">Quantity</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-600">Price</th>
-                <th className="text-center px-4 py-3 font-medium text-gray-600">Status</th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
+        <Card className="overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Product</TableHead>
+                <TableHead>SKU</TableHead>
+                <TableHead className="text-right">Quantity</TableHead>
+                <TableHead className="text-right">Price</TableHead>
+                <TableHead className="text-center">Status</TableHead>
+                <TableHead />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {products.map((p) => {
                 const isLow = p.lowStockThreshold !== null && p.quantity <= p.lowStockThreshold;
                 return (
-                  <tr key={p.id} className="hover:bg-gray-50 transition">
-                    <td className="px-4 py-3 font-medium text-gray-900">{p.name}</td>
-                    <td className="px-4 py-3 font-mono text-xs text-gray-500">{p.sku}</td>
-                    <td className="px-4 py-3 text-right text-gray-700">{p.quantity}</td>
-                    <td className="px-4 py-3 text-right text-gray-700">
+                  <TableRow key={p.id}>
+                    <TableCell className="font-medium text-gray-900">{p.name}</TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">{p.sku}</TableCell>
+                    <TableCell className="text-right tabular-nums">{p.quantity}</TableCell>
+                    <TableCell className="text-right tabular-nums text-muted-foreground">
                       {p.sellingPrice != null ? `$${p.sellingPrice.toFixed(2)}` : "—"}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      {isLow ? (
-                        <span className="text-xs bg-red-100 text-red-700 font-medium px-2 py-0.5 rounded-full">
-                          Low Stock
-                        </span>
-                      ) : (
-                        <span className="text-xs bg-green-100 text-green-700 font-medium px-2 py-0.5 rounded-full">
-                          OK
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {isLow
+                        ? <Badge variant="destructive" className="text-xs">Low Stock</Badge>
+                        : <Badge className="text-xs text-green-700 bg-green-100 hover:bg-green-100 border-green-200">In Stock</Badge>
+                      }
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
                         <Link
                           href={`/products/${p.id}/edit`}
-                          className="text-blue-600 hover:underline text-xs font-medium"
+                          className={cn(buttonVariants({ variant: "ghost", size: "icon-sm" }))}
+                          aria-label="Edit"
                         >
-                          Edit
+                          <Pencil size={14} />
                         </Link>
-                        <button
-                          onClick={() => setConfirmTarget({ id: p.id, name: p.name })}
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
                           disabled={deleting === p.id}
-                          className="text-red-500 hover:text-red-700 text-xs font-medium disabled:opacity-40"
+                          onClick={() => setConfirmTarget({ id: p.id, name: p.name })}
+                          aria-label="Delete"
                         >
-                          {deleting === p.id ? "…" : "Delete"}
-                        </button>
+                          <Trash2 size={14} />
+                        </Button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
+        </Card>
       )}
 
       <AlertDialog open={!!confirmTarget} onOpenChange={(open) => { if (!open) setConfirmTarget(null); }}>
@@ -159,10 +186,7 @@ export default function ProductsPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
-            >
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

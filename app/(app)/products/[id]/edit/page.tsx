@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import ProductForm from "@/components/ProductForm";
 
 export default function EditProductPage() {
@@ -28,15 +31,22 @@ export default function EditProductPage() {
 
   if (!product) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-sm text-gray-400">Loading…</div>
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-36" />
+        <Skeleton className="h-96 w-full max-w-xl rounded-xl" />
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Edit Product</h1>
+      <div>
+        <Link href="/products" className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit mb-3">
+          <ChevronLeft size={15} /> Products
+        </Link>
+        <h1 className="text-2xl font-bold text-gray-900">Edit Product</h1>
+        <p className="text-sm text-muted-foreground mt-1">Update details for <span className="font-medium text-foreground">{product.name}</span></p>
+      </div>
       <ProductForm
         mode="edit"
         initialData={{

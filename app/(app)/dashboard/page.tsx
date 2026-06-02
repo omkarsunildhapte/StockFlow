@@ -3,6 +3,20 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Package, Layers, AlertTriangle, CheckCircle2, ArrowRight } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 interface LowStockProduct {
   id: string;
@@ -31,75 +45,118 @@ export default function DashboardPage() {
 
   if (!data) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-sm text-gray-400">Loading…</div>
+      <div className="space-y-8">
+        <Skeleton className="h-8 w-36" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Skeleton className="h-32 rounded-xl" />
+          <Skeleton className="h-32 rounded-xl" />
+        </div>
+        <Skeleton className="h-64 rounded-xl" />
       </div>
     );
   }
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <StatCard label="Total Products" value={data.totalProducts} />
-        <StatCard label="Total Units in Stock" value={data.totalQuantity} />
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <p className="text-sm text-muted-foreground mt-1">Your inventory at a glance</p>
       </div>
 
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-gray-800">Low Stock Items</h2>
-          {data.lowStock.length > 0 && (
-            <span className="text-xs bg-red-100 text-red-700 font-medium px-2 py-0.5 rounded-full">
-              {data.lowStock.length} item{data.lowStock.length !== 1 ? "s" : ""}
-            </span>
-          )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Products</CardTitle>
+            <div className="bg-primary/10 p-2 rounded-lg">
+              <Package size={16} className="text-primary" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold text-gray-900">{data.totalProducts.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground mt-1">unique SKUs tracked</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Units in Stock</CardTitle>
+            <div className="bg-primary/10 p-2 rounded-lg">
+              <Layers size={16} className="text-primary" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold text-gray-900">{data.totalQuantity.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground mt-1">across all products</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-gray-900">Low Stock Items</h2>
+            {data.lowStock.length > 0 && (
+              <Badge variant="destructive" className="text-xs">
+                {data.lowStock.length} item{data.lowStock.length !== 1 ? "s" : ""}
+              </Badge>
+            )}
+          </div>
+          <Link href="/products" className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-1")}>
+            View all <ArrowRight size={13} />
+          </Link>
         </div>
 
         {data.lowStock.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-sm text-gray-400">
-            No low stock items. You&apos;re all good!
-          </div>
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12 gap-2">
+              <CheckCircle2 size={36} className="text-green-500" />
+              <p className="font-medium text-gray-700">No low stock items</p>
+              <p className="text-sm text-muted-foreground">All products are well stocked</p>
+            </CardContent>
+          </Card>
         ) : (
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Name</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">SKU</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-600">Qty on Hand</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-600">Threshold</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
+          <Card className="overflow-hidden">
+            <div className="bg-red-50 border-b border-red-100 px-4 py-2.5 flex items-center gap-2">
+              <AlertTriangle size={14} className="text-red-500" />
+              <p className="text-xs font-medium text-red-700">
+                {data.lowStock.length} product{data.lowStock.length !== 1 ? "s are" : " is"} below the low stock threshold
+              </p>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Product</TableHead>
+                  <TableHead>SKU</TableHead>
+                  <TableHead className="text-right">Qty on Hand</TableHead>
+                  <TableHead className="text-right">Threshold</TableHead>
+                  <TableHead />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {data.lowStock.map((p) => (
-                  <tr key={p.id} className="hover:bg-gray-50 transition">
-                    <td className="px-4 py-3">
-                      <Link href={`/products/${p.id}/edit`} className="text-blue-600 hover:underline font-medium">
+                  <TableRow key={p.id}>
+                    <TableCell className="font-medium">
+                      <Link href={`/products/${p.id}/edit`} className="text-primary hover:underline">
                         {p.name}
                       </Link>
-                    </td>
-                    <td className="px-4 py-3 text-gray-500 font-mono text-xs">{p.sku}</td>
-                    <td className="px-4 py-3 text-right">
-                      <span className="text-red-600 font-semibold">{p.quantity}</span>
-                    </td>
-                    <td className="px-4 py-3 text-right text-gray-500">{p.lowStockThreshold ?? "—"}</td>
-                  </tr>
+                    </TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">{p.sku}</TableCell>
+                    <TableCell className="text-right">
+                      <span className="font-semibold text-red-600">{p.quantity}</span>
+                    </TableCell>
+                    <TableCell className="text-right text-muted-foreground">{p.lowStockThreshold ?? "—"}</TableCell>
+                    <TableCell className="text-right">
+                      <Link href={`/products/${p.id}/edit`} className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
+                        Restock
+                      </Link>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
+          </Card>
         )}
       </div>
-    </div>
-  );
-}
-
-function StatCard({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5">
-      <p className="text-sm text-gray-500 mb-1">{label}</p>
-      <p className="text-3xl font-bold text-gray-900">{value.toLocaleString()}</p>
     </div>
   );
 }
