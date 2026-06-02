@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface ProductFormProps {
   initialData?: {
@@ -30,16 +31,14 @@ const empty = {
 export default function ProductForm({ initialData, mode }: ProductFormProps) {
   const router = useRouter();
   const [form, setForm] = useState(initialData ?? empty);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   function set(field: string, value: string | number) {
     setForm((f) => ({ ...f, [field]: value }));
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: { preventDefault(): void }) {
     e.preventDefault();
-    setError("");
     setLoading(true);
 
     const url = mode === "edit" ? `/api/products/${initialData?.id}` : "/api/products";
@@ -54,11 +53,12 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
     setLoading(false);
 
     if (res.ok) {
+      toast.success(mode === "edit" ? "Product updated" : "Product created");
       router.push("/products");
       router.refresh();
     } else {
       const data = await res.json();
-      setError(data.error || "Something went wrong");
+      toast.error(data.error || "Something went wrong");
     }
   }
 
@@ -162,8 +162,6 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
-
-      {error && <p className="text-sm text-red-500">{error}</p>}
 
       <div className="flex items-center gap-3 pt-2">
         <button

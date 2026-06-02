@@ -3,6 +3,17 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Product {
   id: string;
@@ -19,6 +30,7 @@ export default function ProductsPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [confirmTarget, setConfirmTarget] = useState<{ id: string; name: string } | null>(null);
 
   const fetchProducts = useCallback(async (q: string) => {
     const res = await fetch(`/api/products?q=${encodeURIComponent(q)}`);
@@ -31,12 +43,21 @@ export default function ProductsPage() {
     fetchProducts(search);
   }, [search, fetchProducts]);
 
-  async function handleDelete(id: string, name: string) {
-    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+  async function handleDelete() {
+    if (!confirmTarget) return;
+    const { id, name } = confirmTarget;
+    setConfirmTarget(null);
     setDeleting(id);
-    await fetch(`/api/products/${id}`, { method: "DELETE" });
-    setProducts((prev) => prev.filter((p) => p.id !== id));
+
+    const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
     setDeleting(null);
+
+    if (res.ok) {
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+      toast.success(`"${name}" deleted`);
+    } else {
+      toast.error("Failed to delete product");
+    }
   }
 
   return (
@@ -112,7 +133,7 @@ export default function ProductsPage() {
                           Edit
                         </Link>
                         <button
-                          onClick={() => handleDelete(p.id, p.name)}
+                          onClick={() => setConfirmTarget({ id: p.id, name: p.name })}
                           disabled={deleting === p.id}
                           className="text-red-500 hover:text-red-700 text-xs font-medium disabled:opacity-40"
                         >
@@ -127,6 +148,26 @@ export default function ProductsPage() {
           </table>
         </div>
       )}
+
+      <AlertDialog open={!!confirmTarget} onOpenChange={(open) => { if (!open) setConfirmTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete product?</AlertDialogTitle>
+            <AlertDialogDescription>
+              <strong>&ldquo;{confirmTarget?.name}&rdquo;</strong> will be permanently removed. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

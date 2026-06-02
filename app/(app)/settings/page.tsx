@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function SettingsPage() {
   const [threshold, setThreshold] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     fetch("/api/settings").then(async (res) => {
@@ -17,10 +16,8 @@ export default function SettingsPage() {
     });
   }, []);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: { preventDefault(): void }) {
     e.preventDefault();
-    setError("");
-    setSuccess(false);
     setSaving(true);
 
     const res = await fetch("/api/settings", {
@@ -32,11 +29,10 @@ export default function SettingsPage() {
     setSaving(false);
 
     if (res.ok) {
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
+      toast.success("Settings saved");
     } else {
       const data = await res.json();
-      setError(data.error || "Failed to save");
+      toast.error(data.error || "Failed to save settings");
     }
   }
 
@@ -73,9 +69,6 @@ export default function SettingsPage() {
               className="w-40 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-
-          {error && <p className="text-sm text-red-500">{error}</p>}
-          {success && <p className="text-sm text-green-600">Settings saved.</p>}
 
           <button
             type="submit"
